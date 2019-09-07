@@ -8,14 +8,13 @@ const gallery = document.querySelector('div#gallery');
 ---------- FETCH DATA ------------
 --------------------------------*/
 
-function fetchData(url) {
-  fetch(url)
+fetch('https://randomuser.me/api/?results=12')
   .then(data => data.json())
-  .then(res => generateGallery(res.results[0]))
-}
-for (let i = 0; i < 12; i += 1) {
-  fetchData('https://randomuser.me/api/');
-}
+  .then(res => {
+    for (let i = 0; i < 12; i += 1) {
+      generateGallery(res.results[i])
+    }
+  })
 
   /* -------------------------------
   ---------- FUNCTIONS -------------
