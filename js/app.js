@@ -6,20 +6,23 @@ window.addEventListener('DOMContentLoaded', () => {
 
 const body = document.querySelector('body');
 const gallery = document.querySelector('div#gallery');
+const searchContainer = document.querySelector('.search-container');
+let searchInput;
+let dataObject;
+let modalNumber = 0;
 
 /* -------------------------------
 ---------- FETCH DATA ------------
 --------------------------------*/
 
 
-
-fetch('https://randomuser.me/api/?results=12')
+fetch('https://randomuser.me/api/?results=12&nat=gb')
   .then( data => data.json() )
   .then(res => {
-    console.log(res);
     for (let i = 0; i < 12; i += 1) {
       generateGallery(res.results[i]);
     }
+    dataObject = res.results;
   })
 
   /* -------------------------------
@@ -43,18 +46,8 @@ function generateGallery(data) {
   gallery.innerHTML += html;
 }
 
-function checkClick(e) {
-  const divId = e.target.getAttribute('id');
-  if (divId !== 'gallery') {
-    return true;
-  } else if (divId === 'gallery') {
-    return false;
-  } else {
-    return true;
-  }
-}
-
 function generateModal(data) {
+
   const html = `
   <div class="modal-container">
       <div class="modal">
@@ -70,9 +63,42 @@ function generateModal(data) {
               <p class="modal-text">Birthday: ${data.registered.date}</p>
           </div>
       </div>
+      <div class="modal-btn-container">
+          <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+          <button type="button" id="modal-next" class="modal-next btn">Next</button>
+      </div>
   </div>
 `
+  if (document.querySelector('div.modal-container')) {
+    body.removeChild(document.querySelector('div.modal-container'));
+  }
   body.innerHTML += html;
+}
+
+function generateSearchBar() {
+  const html = `
+  <form action="#" method="get">
+      <input type="search" id="search-input" class="search-input" placeholder="Search...">
+      <input type="submit" value="&#x1F50D;" id="serach-submit" class="search-submit">
+  </form>
+  `
+  searchContainer.innerHTML = html;
+}
+
+function checkClick(e) {
+  let divClicked;
+  const divClass = e.target.getAttribute("class");
+
+  if (e.target.divClass === 'gallery') {
+    return false;
+  } else if (e.target.className === 'card') {
+    return divClicked = e.target;
+  } else if (e.target.tagName === 'BUTTON') {
+    return false;
+  } else {
+    return divClicked = e.target.parentElement.parentElement;
+  }
+
 }
 
 /* -------------------------------
@@ -80,10 +106,63 @@ function generateModal(data) {
 --------------------------------*/
 
 body.addEventListener('click', (e) => {
-  if (checkClick(e)) {
-    generateModal(data); //no data to send to the generateModal function
+  if (checkClick(e) !== false) {
+    const cards = document.querySelectorAll('.card');
+    for (let i = 0; i < cards.length; i += 1) {
+      if (checkClick(e) === cards[i]) {
+        generateModal(dataObject[i]);
+        modalNumber = i;
+      }
+    }
+  }
+
+  if (e.target.className === '#modal-close-btn' || e.target.tagName === 'STRONG') {
+    body.removeChild(document.querySelector('div.modal-container'));
+  } else if (e.target.className === "modal-prev btn") {
+    if (modalNumber <= 0) {
+      return false;
+    } else {
+      modalNumber -= 1;
+      generateModal(dataObject[modalNumber]);
+    }
+  } else if (e.target.className === "modal-next btn") {
+    if (modalNumber >= 11) {
+      return false;
+    } else {
+      modalNumber += 1;
+      generateModal(dataObject[modalNumber]);
+    }
   }
 });
+
+generateSearchBar();
+
+body.addEventListener('submit', (e) => {
+  searchInput = document.querySelector('.search-input');
+  let value = searchInput.value.toUpperCase();
+  let h3 = document.querySelectorAll('.card-name');
+  const cards = document.querySelectorAll('.card');
+
+  for (let i = 0; i < cards.length; i += 1) {
+    if (h3[i].textContent.toUpperCase().includes(value)) {
+      cards[i].style.opacity = 1.0;
+    } else {
+      cards[i].style.opacity = 0;
+    }
+  }
+});
+
+body.addEventListener('keyup', (e) => {
+  searchInput = document.querySelector('.search-input');
+  let h3 = document.querySelectorAll('.card-name');
+  const cards = document.querySelectorAll('.card');
+  if (searchInput.value === '') {
+    for (let i = 0; i < cards.length; i += 1) {
+      cards[i].style.opacity = 1.0;
+    }
+  }
+});
+
 
 
 });
