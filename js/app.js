@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to load before JavaScript files are executed 
+window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to load before JavaScript files are executed
 
   /* -------------------------------
   ---------- GLOBAL VARIABLES ------
@@ -47,7 +47,7 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
     gallery.innerHTML += html;
   }
 
-
+//
   //adds the modal html to the page
   function generateModal(data) {
     const html = `
@@ -62,7 +62,7 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
                 <hr>
                 <p class="modal-text">${data.phone}</p>
                 <p class="modal-text">${data.location.street}, ${data.location.state}, ${data.location.postcode}</p>
-                <p class="modal-text">Birthday: ${data.registered.date}</p>
+                <p class="modal-text">Birthday: ${/\d{4}-\d{2}-\d{2}/.exec(data.registered.date)}</p>
             </div>
         </div>
         <div class="modal-btn-container">
