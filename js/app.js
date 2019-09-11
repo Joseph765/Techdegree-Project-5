@@ -23,6 +23,7 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
         generateGallery(res.results[i]);
       }
       dataObject = res.results;
+      console.log(res.results);
     })
 
     /* -------------------------------
@@ -38,16 +39,16 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
             <img class="card-img" src="${data.picture.large}" alt="profile picture">
         </div>
         <div class="card-info-container">
-            <h3 id="name" class="card-name cap">${data.name.first}, ${data.name.last}</h3>
+            <h3 id="name" class="card-name cap">${data.name.first} ${data.name.last}</h3>
             <p class="card-text">${data.email}</p>
-            <p class="card-text cap">${data.location.city}, ${data.location.state}</p>
+            <p class="card-text cap">${data.location.city}</p>
         </div>
       </div>
     `
     gallery.innerHTML += html;
   }
 
-//
+
   //adds the modal html to the page
   function generateModal(data) {
     const html = `
@@ -56,13 +57,13 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
             <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
             <div class="modal-info-container">
                 <img class="modal-img" src="${data.picture.large}" alt="profile picture">
-                <h3 id="name" class="modal-name cap">${data.name.first}, ${data.name.last}</h3>
+                <h3 id="name" class="modal-name cap">${data.name.first} ${data.name.last}</h3>
                 <p class="modal-text">${data.email}</p>
                 <p class="modal-text cap">${data.location.city}</p>
                 <hr>
-                <p class="modal-text">${data.phone}</p>
-                <p class="modal-text">${data.location.street}, ${data.location.state}, ${data.location.postcode}</p>
-                <p class="modal-text">Birthday: ${/\d{4}-\d{2}-\d{2}/.exec(data.registered.date)}</p>
+                <p class="modal-text">${formatData(data.phone, 'phoneNumber')}</p>
+                <p class="modal-text capitalize">${data.location.street}, ${data.location.state}, ${data.location.postcode}</p>
+                <p class="modal-text">Birthday: ${formatData(data.registered.date, 'birthday')}</p>
             </div>
         </div>
         <div class="modal-btn-container">
@@ -75,6 +76,16 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
       body.removeChild(document.querySelector('div.modal-container'));
     }
     body.innerHTML += html;
+  }
+
+
+  //formats phone numbers, birthdays, etc...
+  function formatData(data, type) {
+    if (type === 'phoneNumber') {
+      return data.substr(1).replace(/[^\d]+/g, '').replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+    } else if (type === 'birthday') {
+      return /\d{4}-\d{2}-\d{2}/.exec(data); //.replace(/(\d{4})(\d{2})(\d{2})/, "")
+    }
   }
 
 
@@ -107,6 +118,18 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
     }
   }
 
+  function removeNextOrPrevButton(modalNumber) {
+    const prevButton = document.querySelector(".modal-prev");
+    const nextButton = document.querySelector(".modal-next");
+    if (prevButton) {
+      if (modalNumber === 0) {
+        prevButton.style.opacity = 0;
+      } else if (modalNumber === 11) {
+        nextButton.style.opacity = 0;
+      }
+    }
+  }
+
   /* -------------------------------
   ------- CLICK EVENT LISTENER -----
   --------------------------------*/
@@ -122,12 +145,14 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
           modalNumber = i; //The modal number is an index number of which card the modal represents
         }
       }
+      removeNextOrPrevButton(modalNumber);
     }
 
   //event listener for the button that closes the modal
     if (e.target.className === '#modal-close-btn' || e.target.tagName === 'STRONG') {
       body.removeChild(document.querySelector('div.modal-container'));
     } else if (e.target.className === "modal-prev btn") { //event listener for the 'previous' button
+      removeNextOrPrevButton(modalNumber);
       if (modalNumber <= 0) {
         return false;
       } else {
@@ -135,6 +160,7 @@ window.addEventListener('DOMContentLoaded', () => { //waits for HTML and CSS to 
         generateModal(dataObject[modalNumber]); //generates modal according to the index number of the card
       }
     } else if (e.target.className === "modal-next btn") { //event listener for the 'next' button
+      removeNextOrPrevButton(modalNumber);
       if (modalNumber >= 11) {
         return false;
       } else {
